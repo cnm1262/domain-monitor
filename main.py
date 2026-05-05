@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Domain
 from monitor import check_all_domains
+from database import Base, engine
+from models import Domain
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
