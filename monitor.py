@@ -4,8 +4,6 @@ from database import SessionLocal
 from models import Domain
 from email_utils import send_alert
 
-OWNER_EMAIL = "owner_email@gmail.com"
-
 def check_all_domains():
     db = SessionLocal()
     domains = db.query(Domain).all()
@@ -13,9 +11,9 @@ def check_all_domains():
     for domain in domains:
         try:
             response = requests.get(domain.url, timeout=5)
-            domain.response_time = str(response.elapsed.total_seconds())
+            domain.response_time = response.elapsed.total_seconds()
 
-            if response.status_code == 200:
+            if 200 <= response.status_code < 400:
                 domain.status = "UP"
             else:
                 domain.status = "DOWN"
@@ -26,10 +24,7 @@ def check_all_domains():
             domain.response_time = 0
             send_alert(domain.owner_email, domain.url)
 
-        domain.last_checked = datetime.utcnow()
+        domain.last_checked = datetime.utcnow().isoformat()
 
     db.commit()
     db.close()
-
-if __name__ == "__main__":
-    check_all_domains()

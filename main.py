@@ -1,17 +1,30 @@
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
-from database import SessionLocal
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from database import Base, engine, SessionLocal
 from models import Domain
 from monitor import check_all_domains
-from database import Base, engine
-from models import Domain
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class DomainCreate(BaseModel):
+    url: str
+    owner_email: str
+
 @app.get("/")
 def home():
-    return {"message": "API running"}
+    return FileResponse("index.html")
 
 @app.get("/domains")
 def get_domains():
@@ -20,15 +33,18 @@ def get_domains():
     db.close()
     return domains
 
-from models import DomainCreate
-
 @app.post("/domains")
-def add_domain(domain: dict):
+def add_domain(domain: DomainCreate):
     db = SessionLocal()
 
+    existing = db.query(Domain).filter(Domain.url == domain.url).first()
+    if existing:
+        db.close()
+        return {"message": "Domain already exists"}
+
     new_domain = Domain(
-        url=domain["url"],
-        owner_email=domain["owner_email"]
+        url=domain.url,
+        owner_email=domain.owner_email
     )
 
     db.add(new_domain)
@@ -41,4 +57,4 @@ def add_domain(domain: dict):
 @app.get("/check-now")
 def check_now():
     check_all_domains()
-    return {"message": "checked"}
+    return {"message": "All domains checked"}
