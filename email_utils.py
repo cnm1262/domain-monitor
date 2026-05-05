@@ -11,12 +11,13 @@ def send_alert(to_email, domain):
     msg["To"] = to_email
 
     msg.set_content(f"""
-Alert!
+Bonjour,
 
-Your website is down:
+Votre site web est indisponible :
+
 {domain}
 
-Please check it as soon as possible.
+Merci de le vérifier rapidement.
 """)
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:

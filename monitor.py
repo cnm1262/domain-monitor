@@ -19,12 +19,12 @@ def check_all_domains():
                 domain.status = "UP"
             else:
                 domain.status = "DOWN"
-                send_alert(OWNER_EMAIL, domain.url)
+                send_alert(domain.owner_email, domain.url)
 
         except Exception:
             domain.status = "DOWN"
-            domain.response_time = "0"
-            send_alert(OWNER_EMAIL, domain.url)
+            domain.response_time = 0
+            send_alert(domain.owner_email, domain.url)
 
         domain.last_checked = datetime.utcnow()
 

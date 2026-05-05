@@ -43,6 +43,10 @@ def add_domain(domain: DomainCreate, db: Session = Depends(get_db)):
 def get_domains(db: Session = Depends(get_db)):
     return db.query(Domain).all()
 
+@app.get("/")
+def home():
+    return {"message": "Domain Monitor API is running"}
+
 @app.get("/check-now")
 def check_now():
     check_all_domains()
