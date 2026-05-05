@@ -1,53 +1,36 @@
 from fastapi import FastAPI, Depends
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from database import Base, engine, SessionLocal
+from database import SessionLocal
 from models import Domain
 from monitor import check_all_domains
-from fastapi.middleware.cors import CORSMiddleware
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.get("/")
+def home():
+    return {"message": "API running"}
 
-class DomainCreate(BaseModel):
-    url: str
-
-def get_db():
+@app.get("/domains")
+def get_domains():
     db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    domains = db.query(Domain).all()
+    db.close()
+    return domains
 
 @app.post("/domains")
-def add_domain(domain: DomainCreate, db: Session = Depends(get_db)):
-    new_domain = Domain(url=domain.url)
+def add_domain(domain: dict):
+    db = SessionLocal()
+    new_domain = Domain(
+        url=domain["url"],
+        owner_email=domain["owner_email"]
+    )
     db.add(new_domain)
     db.commit()
     db.refresh(new_domain)
-
-    return {
-        "message": "Domain added successfully",
-        "domain": new_domain.url
-    }
-
-@app.get("/domains")
-def get_domains(db: Session = Depends(get_db)):
-    return db.query(Domain).all()
-
-@app.get("/")
-def home():
-    return {"message": "Domain Monitor API is running"}
+    db.close()
+    return new_domain
 
 @app.get("/check-now")
 def check_now():
     check_all_domains()
-    return {"message": "All domains checked"}
+    return {"message": "checked"}
