@@ -23,16 +23,19 @@ def get_domains():
 from models import DomainCreate
 
 @app.post("/domains")
-def add_domain(domain: DomainCreate):
+def add_domain(domain: dict):
     db = SessionLocal()
+
     new_domain = Domain(
-        url=domain.url,
-        owner_email=domain.owner_email
+        url=domain["url"],
+        owner_email=domain["owner_email"]
     )
+
     db.add(new_domain)
     db.commit()
     db.refresh(new_domain)
     db.close()
+
     return new_domain
 
 @app.get("/check-now")

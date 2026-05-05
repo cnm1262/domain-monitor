@@ -1,16 +1,12 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from datetime import datetime
+from sqlalchemy import Column, Integer, String, Float
 from database import Base
-from pydantic import BaseModel
 
-class DomainCreate(BaseModel):
-    url: str
-    owner_email: str
 class Domain(Base):
     __tablename__ = "domains"
 
     id = Column(Integer, primary_key=True, index=True)
     url = Column(String, unique=True, index=True)
+    owner_email = Column(String)
     status = Column(String, default="UNKNOWN")
-    response_time = Column(String, default="0")
-    last_checked = Column(DateTime, default=datetime.utcnow)
+    response_time = Column(Float, default=0)
+    last_checked = Column(String, default="")
