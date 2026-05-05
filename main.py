@@ -17,12 +17,14 @@ def get_domains():
     db.close()
     return domains
 
+from models import DomainCreate
+
 @app.post("/domains")
-def add_domain(domain: dict):
+def add_domain(domain: DomainCreate):
     db = SessionLocal()
     new_domain = Domain(
-        url=domain["url"],
-        owner_email=domain["owner_email"]
+        url=domain.url,
+        owner_email=domain.owner_email
     )
     db.add(new_domain)
     db.commit()

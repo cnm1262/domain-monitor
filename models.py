@@ -1,7 +1,11 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime
 from database import Base
+from pydantic import BaseModel
 
+class DomainCreate(BaseModel):
+    url: str
+    owner_email: str
 class Domain(Base):
     __tablename__ = "domains"
 
